@@ -12,8 +12,8 @@ namespace RiftForge.Editor
     public static class NativeExport
     {
         private const string AppId = "tw.mars.riftforge3d";
-        public const string Version = "1.3.0";
-        public const int Build = 4;
+        public const string Version = "1.3.1";
+        public const int Build = 5;
         private const string ScenePath = NativeReleaseGate.MainScenePath;
 
         public static void Android()
