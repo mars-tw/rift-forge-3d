@@ -5,6 +5,7 @@ namespace RiftForge
     public enum RunPhase { Title, Combat, Forge, Victory, Defeat }
     public enum ForgeUpgrade { Blade, Vitality, Dodge }
     public enum EnemyKind { Stalker, Lancer, Warden }
+    public enum ForgeContract { None, Counter, Finisher, Imprint }
 
     /// <summary>Pure, deterministic rules for a single offline run. A drop must be collected before a wave ends.</summary>
     public sealed class RiftRunState
@@ -19,6 +20,11 @@ namespace RiftForge
         public int BladeLevel { get; private set; }
         public int VitalityLevel { get; private set; }
         public int DodgeLevel { get; private set; }
+        public ForgeContract NextContract { get; private set; }
+        public ForgeContract ActiveContract { get; private set; }
+        public int ContractProgress { get; private set; }
+        public int ContractTarget => ContractTargetFor(ActiveContract);
+        public int ContractReward { get; private set; }
         public int MaximumHealth => 100 + 25 * VitalityLevel;
         public int AttackDamage => 28 + 9 * BladeLevel;
         public float DodgeCooldown => Math.Max(0.55f, 2f - 0.32f * DodgeLevel);
@@ -31,12 +37,21 @@ namespace RiftForge
 
         public RiftCheckpoint Checkpoint() => new RiftCheckpoint { route = (int)Route, wave = Wave,
             health = Health, material = Material, blade = BladeLevel, vitality = VitalityLevel,
-            dodge = DodgeLevel, forge = Phase == RunPhase.Forge };
+            dodge = DodgeLevel, forge = Phase == RunPhase.Forge, contractSchema = 1,
+            nextContract = Phase == RunPhase.Forge ? (int)NextContract : (int)ForgeContract.None,
+            activeContract = (int)ActiveContract,
+            contractProgress = Phase == RunPhase.Forge ? ContractProgress : 0,
+            contractReward = Phase == RunPhase.Forge ? ContractReward : 0 };
         public void Restore(RiftCheckpoint c)
         {
             if (c == null || !c.IsValid) throw new ArgumentException("Invalid checkpoint.");
             Route = (RiftRoute)c.route; Wave = c.wave; Health = c.health; Material = c.material;
             BladeLevel = c.blade; VitalityLevel = c.vitality; DodgeLevel = c.dodge;
+            bool hasContracts = c.contractSchema == 1;
+            NextContract = hasContracts && c.forge ? (ForgeContract)c.nextContract : ForgeContract.None;
+            ActiveContract = hasContracts ? (ForgeContract)c.activeContract : ForgeContract.None;
+            ContractProgress = hasContracts && c.forge ? c.contractProgress : 0;
+            ContractReward = hasContracts && c.forge ? c.contractReward : 0;
             Phase = c.forge ? RunPhase.Forge : RunPhase.Combat;
             EnemiesRemaining = c.forge ? 0 : CurrentEnemyCount; DropsRemaining = 0;
         }
@@ -45,6 +60,30 @@ namespace RiftForge
         {
             if (wave < 1 || wave > FinalWave) throw new ArgumentOutOfRangeException(nameof(wave));
             return wave == FinalWave ? 1 : wave + 2;
+        }
+
+        public static int ContractTargetFor(ForgeContract contract)
+        {
+            switch (contract)
+            {
+                case ForgeContract.None: return 0;
+                case ForgeContract.Counter: return 1;
+                case ForgeContract.Finisher:
+                case ForgeContract.Imprint: return 2;
+                default: throw new ArgumentOutOfRangeException(nameof(contract));
+            }
+        }
+
+        public static int ContractRewardFor(ForgeContract contract)
+        {
+            switch (contract)
+            {
+                case ForgeContract.None: return 0;
+                case ForgeContract.Counter: return 4;
+                case ForgeContract.Finisher: return 5;
+                case ForgeContract.Imprint: return 6;
+                default: throw new ArgumentOutOfRangeException(nameof(contract));
+            }
         }
 
         /// <summary>
@@ -90,6 +129,8 @@ namespace RiftForge
             Health = 100;
             Material = 0;
             BladeLevel = VitalityLevel = DodgeLevel = 0;
+            NextContract = ActiveContract = ForgeContract.None;
+            ContractProgress = ContractReward = 0;
             DropsRemaining = 0;
             EnemiesRemaining = CurrentEnemyCount;
             Phase = RunPhase.Combat;
@@ -120,7 +161,31 @@ namespace RiftForge
             Material += amount;
             DropsRemaining--;
             if (EnemiesRemaining == 0 && DropsRemaining == 0)
+            {
+                if (ContractReward == 0 && ActiveContract != ForgeContract.None && ContractProgress >= ContractTarget)
+                {
+                    ContractReward = ContractRewardFor(ActiveContract);
+                    Material += ContractReward;
+                }
                 Phase = IsBossWave ? RunPhase.Victory : RunPhase.Forge;
+            }
+        }
+
+        public bool SelectContract(ForgeContract contract)
+        {
+            if (Phase != RunPhase.Forge || !Enum.IsDefined(typeof(ForgeContract), contract)) return false;
+            NextContract = contract;
+            return true;
+        }
+
+        public void RegisterContractImpact(StrikeKind kind, int actualStrikeHits, int actualImprintHits)
+        {
+            if (Phase != RunPhase.Combat || ActiveContract == ForgeContract.None) return;
+            int gain = 0;
+            if (ActiveContract == ForgeContract.Counter && kind == StrikeKind.Counter && actualStrikeHits > 0) gain = 1;
+            else if (ActiveContract == ForgeContract.Finisher && kind == StrikeKind.Finisher && actualStrikeHits > 0) gain = 1;
+            else if (ActiveContract == ForgeContract.Imprint && kind == StrikeKind.Burst && actualImprintHits > 0) gain = actualImprintHits;
+            ContractProgress = Math.Min(ContractTarget, ContractProgress + gain);
         }
 
         public bool BuyUpgrade(ForgeUpgrade upgrade)
@@ -145,6 +210,9 @@ namespace RiftForge
         {
             if (Phase != RunPhase.Forge || Wave >= WaveLimit) return false;
             Wave++;
+            ActiveContract = NextContract;
+            NextContract = ForgeContract.None;
+            ContractProgress = ContractReward = 0;
             EnemiesRemaining = CurrentEnemyCount;
             DropsRemaining = 0;
             Phase = RunPhase.Combat;

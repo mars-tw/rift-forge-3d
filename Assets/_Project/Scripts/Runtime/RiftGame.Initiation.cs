@@ -48,11 +48,12 @@ namespace RiftForge
                 imprintVisuals.Add(marker);
             }
         }
-        private void DetonateImprints()
+        private int DetonateImprints()
         {
             var points = Imprints.Consume(); RebuildImprintVisuals();
             // One enemy can be hit by one remote imprint per burst, avoiding stacked instant kills.
             var hit = new HashSet<RiftEnemy>();
+            int acceptedRemoteHits = 0;
             foreach (var p in points)
             {
                 fx.Shockwave(p, .3f, PhaseImprints.Radius, .5f);
@@ -61,7 +62,10 @@ namespace RiftForge
                     if (enemy == null || hit.Contains(enemy)) continue;
                     Vector3 offset = enemy.transform.position - p; offset.y = 0;
                     if (offset.sqrMagnitude > PhaseImprints.Radius * PhaseImprints.Radius) continue;
-                    hit.Add(enemy); enemy.TakeHit(run.AttackDamage, offset.normalized * 4f, true);
+                    hit.Add(enemy);
+                    int healthBefore = enemy.Health;
+                    enemy.TakeHit(run.AttackDamage, offset.normalized * 4f, true);
+                    if (enemy.Health < healthBefore) acceptedRemoteHits++;
                 }
             }
             if (Initiation == InitiationStep.Burst && points.Length > 0)
@@ -70,6 +74,7 @@ namespace RiftForge
                 Progress.CompleteInitiation();
                 hud.ShowBanner("初鍛完成", "你留下的鍛印，成了下一次爆發的落點", Palette.Gold);
             }
+            return acceptedRemoteHits;
         }
     }
 }

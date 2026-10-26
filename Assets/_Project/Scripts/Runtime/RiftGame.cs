@@ -298,6 +298,17 @@ namespace RiftForge
             hud.Refresh();
         }
 
+        /// <summary>Cycle the optional contract for the next wave. Contracts never replace forge purchases.</summary>
+        public void CycleContract()
+        {
+            if (run.Phase != RunPhase.Forge || IsInitiation) return;
+            ForgeContract next = (ForgeContract)(((int)run.NextContract + 1) % 4);
+            if (!run.SelectContract(next)) return;
+            audioFx.Play(RiftSfx.UiTap, 0.75f, 1.05f);
+            SaveCheckpoint();
+            hud.Refresh();
+        }
+
         public bool Purchase(ForgeUpgrade upgrade)
         {
             bool bought = run.BuyUpgrade(upgrade);
@@ -384,6 +395,7 @@ namespace RiftForge
             bool stagger = kind == StrikeKind.Finisher || kind == StrikeKind.Counter || kind == StrikeKind.Burst;
             CreateSlash(kind);
             int hits = 0;
+            int actualHits = 0;
             for (int i = enemies.Count - 1; i >= 0; i--)
             {
                 if (i >= enemies.Count) continue;
@@ -397,7 +409,9 @@ namespace RiftForge
                 Vector3 push = (delta.sqrMagnitude > 0.01f ? delta.normalized : facing) * pushForce;
                 Vector3 numberAt = enemy.transform.position + Vector3.up * (enemy.IsBoss ? 3.2f : 2.1f);
                 hits++;
+                int healthBefore = enemy.Health;
                 enemy.TakeHit(damage, push, stagger);
+                if (enemy.Health < healthBefore) actualHits++;
                 hud.ShowDamageNumber(numberAt, damage, kind);
                 fx.Sparks(enemy != null ? enemy.transform.position + Vector3.up * 1.1f : numberAt,
                     kind == StrikeKind.Counter ? Palette.Pink : kind == StrikeKind.Burst || kind == StrikeKind.Finisher ? Palette.Gold : Palette.Cyan,
@@ -405,7 +419,8 @@ namespace RiftForge
             }
             rhythm.RegisterImpact(kind, hits);
             if (kind == StrikeKind.Counter && hits > 0 && Initiation == InitiationStep.Counter) Initiation = InitiationStep.Burst;
-            if (kind == StrikeKind.Burst) DetonateImprints();
+            int actualImprintHits = kind == StrikeKind.Burst ? DetonateImprints() : 0;
+            if (!IsInitiation) run.RegisterContractImpact(kind, actualHits, actualImprintHits);
             if (kind == StrikeKind.Burst && !IsInitiation) Progress.RegisterBurst(hits);
 
             if (kind == StrikeKind.Burst)
