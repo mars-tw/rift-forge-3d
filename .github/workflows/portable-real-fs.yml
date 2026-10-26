@@ -1,0 +1,40 @@
+name: Portable real-filesystem fixture
+
+on:
+  push:
+    branches:
+      - qa/portable-real-fs-20261026
+
+permissions:
+  contents: read
+
+jobs:
+  real-fs-linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          sparse-checkout: ci/portable-real-fs
+      - name: Verify unprivileged Linux runner
+        run: |
+          set -euo pipefail
+          uname -s
+          id -u
+          test "$(id -u)" -ne 0
+      - name: Install exact Godot 4.7 binary
+        run: |
+          set -euo pipefail
+          mkdir -p "${RUNNER_TEMP}/fixture-godot"
+          curl --fail --location --output "${RUNNER_TEMP}/fixture-godot/godot.zip" \
+            https://github.com/godotengine/godot/releases/download/4.7-stable/Godot_v4.7-stable_linux.x86_64.zip
+          echo "0b1a6c54c2c619c12e169fe9241edda4b81080b519451cec2984bf0d2c6cb73c  ${RUNNER_TEMP}/fixture-godot/godot.zip" | sha256sum --check
+          unzip -q "${RUNNER_TEMP}/fixture-godot/godot.zip" -d "${RUNNER_TEMP}/fixture-godot"
+          chmod +x "${RUNNER_TEMP}/fixture-godot/Godot_v4.7-stable_linux.x86_64"
+          "${RUNNER_TEMP}/fixture-godot/Godot_v4.7-stable_linux.x86_64" --version
+      - name: Execute actual Linux permission fixture
+        run: |
+          set -euo pipefail
+          "${RUNNER_TEMP}/fixture-godot/Godot_v4.7-stable_linux.x86_64" \
+            --headless --path ci/portable-real-fs --script res://fixture_harness.gd

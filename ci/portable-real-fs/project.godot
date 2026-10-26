@@ -1,0 +1,12 @@
+; External tiny project for the fixture helper only. It does not load Rift Survivors.
+config_version=5
+
+[application]
+config/name="R5 Portable Real-FS Fixture Harness"
+
+[debug]
+settings/stdout/print_fps=false
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
