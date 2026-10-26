@@ -22,10 +22,26 @@ namespace RiftForge
         public int schema = 1, route, wave, health, material, blade, vitality, dodge, kills, damage;
         public float seconds;
         public bool forge, forgeCounted;
+        public int contractSchema, nextContract, activeContract, contractProgress, contractReward;
         public bool IsValid => schema == 1 && route >= 0 && route <= 3 && wave >= 1 && wave <= RiftRoutes.Waves((RiftRoute)route)
             && (!forge || wave < RiftRoutes.Waves((RiftRoute)route)) && blade >= 0 && blade <= 3 && vitality >= 0 && vitality <= 3
             && dodge >= 0 && dodge <= 3 && health > 0 && health <= 100 + vitality * 25 && material >= 0 && material <= 1000
-            && kills >= 0 && kills <= 100 && damage >= 0 && damage <= 10000 && seconds >= 0 && seconds <= 86400 && !float.IsNaN(seconds);
+            && kills >= 0 && kills <= 100 && damage >= 0 && damage <= 10000 && seconds >= 0 && seconds <= 86400 && !float.IsNaN(seconds)
+            && ContractExtensionIsValid;
+        private bool ContractExtensionIsValid
+        {
+            get
+            {
+                if (contractSchema == 0) return nextContract == 0 && activeContract == 0 && contractProgress == 0 && contractReward == 0;
+                if (contractSchema != 1 || nextContract < 0 || nextContract > 3 || activeContract < 0 || activeContract > 3) return false;
+                var active = (ForgeContract)activeContract;
+                int target = RiftRunState.ContractTargetFor(active), reward = RiftRunState.ContractRewardFor(active);
+                if (contractProgress < 0 || contractProgress > target || contractReward < 0) return false;
+                if (contractReward != 0 && (active == ForgeContract.None || contractProgress != target || contractReward != reward)) return false;
+                if (!forge && (nextContract != 0 || contractProgress != 0 || contractReward != 0)) return false;
+                return true;
+            }
+        }
         public static RiftCheckpoint Parse(string json)
         {
             if (string.IsNullOrEmpty(json)) return null;

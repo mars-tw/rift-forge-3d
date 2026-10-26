@@ -203,14 +203,17 @@ namespace RiftForge
             forgePanel=MobilePanel("The Forge");
             MobileText(forgePanel.transform,"裂隙鍛爐",28,Gold,new Vector4(20,42,350,50),new Vector4(20,16,804,44));
             forgeSummary=MobileText(forgePanel.transform,"",17,White,new Vector4(20,100,350,36),new Vector4(20,62,804,30));
-            storyText=MobileText(forgePanel.transform,"",15,Muted,new Vector4(20,144,350,48),new Vector4(20,96,804,26));
+            storyText=MobileText(forgePanel.transform,"",15,Muted,new Vector4(20,136,350,44),new Vector4(444,90,380,52));
+            contractButton=MobileButton(forgePanel.transform,"下波委託：不接委託",Cyan,()=>game.CycleContract(),
+                new Vector4(24,184,342,86),new Vector4(20,94,400,72),out contractLabel);
+            contractButton.name="Wave Contract Button"; contractLabel.fontSize=15; contractLabel.color=Ink;
             upgradeTitles=new Text[3]; upgradeBodies=new Text[3]; upgradeCosts=new Text[3];
             upgradePips=new Image[3][]; upgradeButtons=new Button[3]; upgradeGroups=new CanvasGroup[3];
             for(int i=0;i<3;i++)
             {
                 var upgrade=(ForgeUpgrade)i;
                 var card=MobileButton(forgePanel.transform,"",Panel,()=>game.Purchase(upgrade),
-                    new Vector4(24,214+i*140,342,124),new Vector4(20+i*272,136,260,146),out var unused);
+                    new Vector4(24,286+i*116,342,104),new Vector4(20+i*272,176,260,128),out var unused);
                 Destroy(unused.gameObject); card.name="Forge Upgrade "+i; upgradeButtons[i]=card;
                 upgradeGroups[i]=card.gameObject.AddComponent<CanvasGroup>();
                 upgradeTitles[i]=AddText(card.transform,"",new Vector2(.5f,.81f),new Vector2(240,28),20,i==0?Cyan:i==1?Gold:Palette.Violet);

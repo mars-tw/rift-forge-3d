@@ -92,6 +92,8 @@ namespace RiftForge
         private RectTransform bossFill;
         private Text bossName;
         private Text forgeSummary;
+        private Button contractButton;
+        private Text contractLabel;
         private Text[] upgradeTitles;
         private Text[] upgradeBodies;
         private Text[] upgradeCosts;
@@ -174,8 +176,12 @@ namespace RiftForge
             }
             else if (phase == RunPhase.Forge)
             {
-                storyText.text = game.DailyRewardThisRun ? "今日鍛造完成！封印印記 +1" : RiftRoutes.Story(run.Route, run.Wave);
+                string priorContract = ContractResult(run);
+                storyText.text = (game.DailyRewardThisRun ? "今日鍛造完成！封印印記 +1" : RiftRoutes.Story(run.Route, run.Wave)) +
+                    (string.IsNullOrEmpty(priorContract) ? "" : "\n" + priorContract);
                 forgeSummary.text = $"第 {run.Wave} 波完成　可用碎片 {run.Material}";
+                contractButton.interactable = !game.IsInitiation;
+                contractLabel.text = $"下波委託：{ContractName(run.NextContract)}\n{ContractRule(run.NextContract)}";
                 SetUpgrade(0, ForgeUpgrade.Blade, "餘燼之刃", $"斬擊  {run.AttackDamage} → {run.AttackDamage + 9}",
                     "劍刃延伸，命中更重");
                 SetUpgrade(1, ForgeUpgrade.Vitality, "活性鎧甲", $"生命  {run.MaximumHealth} → {run.MaximumHealth + 25}",
@@ -232,6 +238,8 @@ namespace RiftForge
                 chargeText.text = $"能量 {Mathf.FloorToInt(rhythm.Charge)}%　鍛印 {game.Imprints.Count}/3";
                 chargeText.color = new Color(Gold.r, Gold.g, Gold.b, 0.85f);
             }
+            string contract = CombatContractProgress(run);
+            if (!string.IsNullOrEmpty(contract)) chargeText.text += "\n" + contract;
 
             int streak = rhythm.HitStreak;
             if (streak != lastComboShown)
@@ -275,9 +283,47 @@ namespace RiftForge
                 $"時間 {FormatTime(score.Seconds)}　擊殺 {score.Kills}　最高連擊 {score.BestStreak}\n" +
                 $"完美閃避 {score.PerfectDodges}　受傷 {score.DamageTaken}　{score.Points:N0} 分";
             outcomeBest[index].text = (game.LastScoreIsBest ? "刷新個人紀錄！　" : "") +
-                $"印記 {game.Progress.Seals}　成就 {game.Progress.AchievementCount}/3";
+                $"印記 {game.Progress.Seals}　成就 {game.Progress.AchievementCount}/3" +
+                (game.Run.ActiveContract == ForgeContract.None ? "" : "\n" + ContractResult(game.Run));
 
             outcomeBest[index].color = game.LastScoreIsBest ? Gold : Muted;
+        }
+
+        private static string ContractName(ForgeContract contract)
+        {
+            switch (contract)
+            {
+                case ForgeContract.Counter: return "相位反擊";
+                case ForgeContract.Finisher: return "終結連擊";
+                case ForgeContract.Imprint: return "鍛印命中";
+                default: return "不接委託";
+            }
+        }
+
+        private static string ContractRule(ForgeContract contract)
+        {
+            switch (contract)
+            {
+                case ForgeContract.Counter: return "反擊命中 1 次｜完成 +4 碎片";
+                case ForgeContract.Finisher: return "終結命中 2 次｜完成 +5 碎片";
+                case ForgeContract.Imprint: return "鍛印實際命中 2 次｜完成 +6 碎片";
+                default: return "可跳過；不影響鍛造與下一波";
+            }
+        }
+
+        private static string CombatContractProgress(RiftRunState run)
+        {
+            if (run.ActiveContract == ForgeContract.None) return "";
+            return $"委託 {ContractName(run.ActiveContract)}　{run.ContractProgress}/{run.ContractTarget}";
+        }
+
+        private static string ContractResult(RiftRunState run)
+        {
+            if (run.ActiveContract == ForgeContract.None) return "";
+            bool complete = run.ContractProgress >= run.ContractTarget;
+            return complete
+                ? $"上波委託：{ContractName(run.ActiveContract)}完成，+{run.ContractReward} 碎片"
+                : $"上波委託：{ContractName(run.ActiveContract)} {run.ContractProgress}/{run.ContractTarget}，未完成";
         }
 
         private void SetUpgrade(int index, ForgeUpgrade upgrade, string name, string stat, string effect)
