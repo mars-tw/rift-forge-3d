@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "engine": "Unity",
+  "editorVersion": "6000.5.4f1",
+  "appId": "tw.mars.riftforge3d",
+  "nativeVersion": "1.3.0",
+  "nativeBuild": 4,
+  "mainScene": "Assets/_Project/Scenes/Main.unity",
+  "sourceStage": "gameplay-unverified",
+  "exportMethods": {
+    "android": "RiftForge.Editor.NativeExport.Android",
+    "ios": "RiftForge.Editor.NativeExport.IOS"
+  },
+  "readyForStore": false
+}

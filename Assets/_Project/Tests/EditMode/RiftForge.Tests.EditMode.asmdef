@@ -1,0 +1,23 @@
+{
+  "name": "RiftForge.Tests.EditMode",
+  "rootNamespace": "RiftForge.Tests.EditMode",
+  "references": [
+    "RiftForge.Runtime",
+    "RiftForge.Editor",
+    "UnityEngine.UI"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false,
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

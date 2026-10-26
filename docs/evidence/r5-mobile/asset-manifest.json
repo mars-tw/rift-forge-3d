@@ -1,0 +1,12 @@
+{
+  "status": "VERIFIED",
+  "asset": "Assets/_Project/Resources/Fonts/NotoSansTC-Regular.otf",
+  "source": "https://github.com/notofonts/noto-cjk/blob/main/Sans/SubsetOTF/TC/NotoSansTC-Regular.otf",
+  "license": "SIL Open Font License 1.1",
+  "licenseFile": "Assets/_Project/Resources/Fonts/OFL.txt",
+  "sha256": "5bab0cb3c1cf89dde07c4a95a4054b195afbcfe784d69d75c340780712237537",
+  "bytes": 5683368,
+  "newRasterArt": false,
+  "imageModelSlug": null,
+  "note": "本輪無新增 2D 美術或 3D 模型；正式模型、骨架與場景素材列缺件。"
+}

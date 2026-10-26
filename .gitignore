@@ -1,0 +1,56 @@
+# ---- Unity 產生物（不可入庫，會讓 repo 爆炸）----
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+
+# Unity 3D 產生的 Addressables/Asset 快取
+/[Aa]ssets/[Ss]treamingAssets/aa.meta
+/[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# ---- IDE / 方案檔（Unity 會自動重生）----
+.vs/
+.gradle/
+.idea/
+ExportedObj/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# ---- 建置產物 ----
+*.apk
+*.aab
+*.unitypackage
+*.app
+
+# ---- 作業系統 ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Crash 報告 ----
+sysinfo.txt
+crashlytics-build.properties
+
+# ---- 秘密（專案鐵律：金鑰絕不入庫）----
+.env
+.env.*
+*.key
+*.pem
+secrets.json

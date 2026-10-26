@@ -1,0 +1,19 @@
+{
+  "name": "RiftForge.Tests.PlayMode",
+  "rootNamespace": "RiftForge.Tests.PlayMode",
+  "references": [
+    "RiftForge.Runtime"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false,
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

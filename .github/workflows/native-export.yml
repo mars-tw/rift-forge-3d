@@ -1,0 +1,43 @@
+name: Export unsigned Unity native projects (prepared runners required)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  android:
+    runs-on: [self-hosted, Windows, Unity6000-5-4f1]
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with: {persist-credentials: false}
+      - name: Export an unsigned native project with an installed licensed Editor
+        env:
+          UNITY_EDITOR_PATH: ${{ vars.UNITY_EDITOR_PATH }}
+        shell: pwsh
+        run: |
+          if (-not (Test-Path -LiteralPath $env:UNITY_EDITOR_PATH)) { throw 'Install Unity 6000.5.4f1 + Android Build Support and configure this prepared runner.' }
+          & $env:UNITY_EDITOR_PATH -batchmode -nographics -quit -projectPath $env:GITHUB_WORKSPACE -executeMethod RiftForge.Editor.NativeExport.Android -logFile "$env:RUNNER_TEMP/rift-forge-native.log"
+          if ($LASTEXITCODE -ne 0) { throw 'Native source/Editor export failed. No blank SampleScene artifact is released.' }
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: rift-forge-android-unsigned-project
+          path: Builds/Native
+          if-no-files-found: error
+  ios:
+    runs-on: [self-hosted, macOS, Unity6000-5-4f1]
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with: {persist-credentials: false}
+      - name: Export an unsigned native Xcode project
+        env:
+          UNITY_EDITOR_PATH: ${{ vars.UNITY_EDITOR_PATH }}
+        run: |
+          set -euo pipefail
+          test -x "$UNITY_EDITOR_PATH" || { echo 'Install Unity 6000.5.4f1 + iOS Build Support on this prepared runner.'; exit 1; }
+          "$UNITY_EDITOR_PATH" -batchmode -nographics -quit -projectPath "$GITHUB_WORKSPACE" -executeMethod RiftForge.Editor.NativeExport.IOS -logFile "$RUNNER_TEMP/rift-forge-native.log"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: rift-forge-ios-unsigned-project
+          path: Builds/Native
+          if-no-files-found: error

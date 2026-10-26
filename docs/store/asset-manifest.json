@@ -1,0 +1,55 @@
+{
+  "status": "EXECUTED",
+  "generationModelSlug": null,
+  "imageGeneration": "Not invoked: tool cannot select or attest gpt-image-2",
+  "assets": [
+    {
+      "source": "Knight",
+      "driveFileId": "1ZAF74xkIeEj_NeCLB2T5h722ygWhyRWv",
+      "bytes": 1886872,
+      "sha256": "9de5edb8c02ccf44d9e2e4614b47c6b7d5271d8e1c2a9efc629f200ec45936bd",
+      "license": "CC0-1.0",
+      "sourcePage": "https://quaternius.com/packs/ultimatedanimatedcharacter"
+    },
+    {
+      "source": "Zombie",
+      "driveFileId": "1AsBOhJNG_7qMotNbbSU2MSRTDifSVDpX",
+      "bytes": 2007788,
+      "sha256": "9fe152e29dfea9c86e76ee13551b4331a99209c4ad4d42243aa7767466dcba7f",
+      "license": "CC0-1.0",
+      "sourcePage": "https://quaternius.com/packs/ultimatedanimatedcharacter"
+    },
+    {
+      "source": "Viking",
+      "driveFileId": "1KzhZBM5UNrsPOWVqgdHxaSXSNB4pvmX4",
+      "bytes": 2133356,
+      "sha256": "3649d3342b6c157abf61314e8afda96d6c5bf724e996cd337c415eb2adf7021c",
+      "license": "CC0-1.0",
+      "sourcePage": "https://quaternius.com/packs/ultimatedanimatedcharacter"
+    },
+    {
+      "file": "Assets/_Project/Resources/Characters/Lancer.fbx",
+      "bytes": 2261676,
+      "sha256": "6000372300724390fbbb60947edc9ad511c651b8ddb5d53dd0a5fe3190656f11",
+      "derivation": "Blender 5.2 background material restyle + rig/action-preserving FBX export"
+    },
+    {
+      "file": "Assets/_Project/Resources/Characters/Sentinel.fbx",
+      "bytes": 2261676,
+      "sha256": "776c6a6679adf7ee0a76f1333658315e1019900f1b8e26b13504c11ffc75212d",
+      "derivation": "Blender 5.2 background material restyle + rig/action-preserving FBX export"
+    },
+    {
+      "file": "Assets/_Project/Resources/Characters/Stalker.fbx",
+      "bytes": 2277276,
+      "sha256": "642915117c15973662c13f57916e401082d60f5d318f0676354cf2dfb11631a4",
+      "derivation": "Blender 5.2 background material restyle + rig/action-preserving FBX export"
+    },
+    {
+      "file": "Assets/_Project/Resources/Characters/Warden.fbx",
+      "bytes": 2363660,
+      "sha256": "388ebca3055d2590abb1262fa0d47791955c82ee4bd5f0cdf5235d230f93e911",
+      "derivation": "Blender 5.2 background material restyle + rig/action-preserving FBX export"
+    }
+  ]
+}
